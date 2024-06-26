@@ -1,19 +1,24 @@
 .product-list {
-    display: flex;
-    justify-content: center;
-    flex-direction: row;
-    gap: 10px;
-  }
-  
-  .product-item {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: #f9f9f9;
-    transition: background-color 0.3s ease;
-  }
-  
-  .product-item:hover {
-    background-color: #e0f7fa;
-  }
-  
+  box-sizing: border-box; 
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px; 
+  width: 100%; 
+}
+
+
+.product-item {
+  flex: 1 0 150px; /* Flex-grow, flex-shrink, and base width of each item */
+  max-width: 200px; 
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+  transition: background-color 0.3s ease;
+}
+
+.product-item:hover {
+  background-color: #e0f7fa;
+}

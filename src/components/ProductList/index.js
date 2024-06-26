@@ -1,7 +1,7 @@
 import React from 'react';
 import './index.css';
 
-const ProductList = ({ products }) => {
+const ProductList = ( {products} ) => {
   return (
     <div className="product-list">
       {products.map(product => (
