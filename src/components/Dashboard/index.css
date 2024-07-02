@@ -1,19 +1,33 @@
+
+.nav-menu {
+  list-style-type: none;
+  display: flex;
+  margin-left: -40px;
+}
+
+.nav-link {
+  text-decoration: none;
+  margin: 8px;
+  color: rgb(30, 22, 17);
+  font-family: 'Roboto';
+}
+
+
+
 .dashboard {
-    padding: 20px;
-    font-family: Arial, sans-serif;
-    text-align: center;
-  }
-  
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: auto;
+  font-family: Arial, sans-serif;
+  align-items: center;
+  padding: 20px;
+  background: url('https://res.cloudinary.com/dhik9tnvf/image/upload/v1719905768/flat-design-shopping-pattern-design_23-2149656934_lbsyqj.avif');
+}
+
   h1 {
+
     text-align: center;
-    color: #333;
+    color: #2c2222;
   }
   
-  .search-input {
-    width: 50%;
-    padding: 10px;
-    margin-bottom: 20px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
