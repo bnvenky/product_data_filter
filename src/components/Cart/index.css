@@ -1,12 +1,4 @@
-/* General Styles */
-body {
-    font-family: 'Arial', sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f5f5f5;
-  }
-  
-  /* Container Styles */
+
   .cart-container {
     width: 80%;
     max-width: 1200px;
@@ -43,7 +35,7 @@ body {
     text-decoration: underline;
   }
   
-  /* Cart List Styles */
+
   .cart-list {
     display: flex;
     flex-direction: column;
@@ -91,7 +83,7 @@ body {
     background-color: #ff1a1a;
   }
   
-  /* Place Order Button Styles */
+  
   .btn-container{
    display: flex;
    flex-direction: row;
