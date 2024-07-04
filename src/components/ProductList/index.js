@@ -1,25 +1,33 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { ClipLoader } from 'react-spinners';
 import './index.css';
-
-const mockProducts = [
-  { id: 1, name: "Motorola", price: "₹14,999 16% off", description: "Bank OfferGet ₹50 instant discount on first Flipkart UPI transaction on order of ₹200 and aboveT&C" },
-  { id: 2, name: "Iphone 15", price: "₹59,999 16% off", description: "Bank OfferGet ₹50 instant discount on first Flipkart UPI transaction on order of ₹200 and aboveT&C" },
-  { id: 3, name: "Samsung S22", price: "₹69,999 16% off", description: "Bank OfferGet ₹50 instant discount on first Flipkart UPI transaction on order of ₹200 and aboveT&C" },
-  { id: 4, name: "Redmi", price: "₹29,999 16% off", description: "Bank OfferGet ₹50 instant discount on first Flipkart UPI transaction on order of ₹200 and aboveT&C" },
-  { id: 5, name: "Oppo", price: "₹39,999 16% off", description: "Bank OfferGet ₹50 instant discount on first Flipkart UPI transaction on order of ₹200 and aboveT&C" },
-  { id: 6, name: "Vivo", price: "₹35,999 16% off", description: "Bank OfferGet ₹50 instant discount on first Flipkart UPI transaction on order of ₹200 and aboveT&C" },
-  { id: 7, name: "Poco", price: "₹14,999 16% off", description: "Bank OfferGet ₹50 instant discount on first Flipkart UPI transaction on order of ₹200 and aboveT&C" },
-  { id: 8, name: "Nothing", price: "₹59,999 16% off", description: "Bank OfferGet ₹50 instant discount on first Flipkart UPI transaction on order of ₹200 and aboveT&C" },
-  { id: 9, name: "Lenevo", price: "₹69,999 16% off", description: "Bank OfferGet ₹50 instant discount on first Flipkart UPI transaction on order of ₹200 and aboveT&C" },
-  { id: 10, name: "Honor", price: "₹29,999 16% off", description: "Bank OfferGet ₹50 instant discount on first Flipkart UPI transaction on order of ₹200 and aboveT&C" },
-  { id: 11, name: "Nokia", price: "₹39,999 16% off", description: "Bank OfferGet ₹50 instant discount on first Flipkart UPI transaction on order of ₹200 and aboveT&C" },
-  { id: 12, name: "OnePluse", price: "₹35,999 16% off", description: "Bank OfferGet ₹50 instant discount on first Flipkart UPI transaction on order of ₹200 and aboveT&C" }
-];
+import ProductFilter from '../ProductFilter';
 
 const ProductList = ({ addToCart }) => {
-  const [products, setProducts] = useState(mockProducts);
+  const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    axios.get('https://dummyjson.com/products')
+      .then(response => {
+        setProducts(response.data.products);
+        setFilteredProducts(response.data.products);
+        const uniqueCategories = [...new Set(response.data.products.map(product => product.category))];
+        setCategories(uniqueCategories);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error fetching the products:', error);
+        setLoading(false);
+      });
+  }, []);
 
   useEffect(() => {
     const savedSortOrder = localStorage.getItem('sortOrder');
@@ -33,42 +41,71 @@ const ProductList = ({ addToCart }) => {
     const value = event.target.value;
     setSearchTerm(value);
 
-    let filteredProducts = mockProducts;
-
     if (value) {
+      let filteredProducts = products;
       if (!isNaN(value)) {
-        filteredProducts = mockProducts.filter(product => product.id === parseInt(value));
+        
+        filteredProducts = products.filter(product => product.id === parseInt(value));
       } else {
-        filteredProducts = mockProducts.filter(product => product.name.toLowerCase().includes(value.toLowerCase()));
+        
+        filteredProducts = products.filter(product => product.title.toLowerCase().includes(value.toLowerCase()));
       }
+      
       if (filteredProducts.length === 0) {
-        filteredProducts = [{ id: 0, name: "Product not available", price: "", description: "" }];
+        setFilteredProducts([{ id: 0, title: "Product not available", price: "", description: "" }]);
+      } else {
+        setFilteredProducts(filteredProducts);
+      }
+    } else {
+      // Show all products when search term is cleared
+      setFilteredProducts(products); 
+    }
+  };
+
+  const handleCategorySelect = (category) => {
+    setSelectedCategory(category)
+    filterProducts(searchTerm,category);
+  };
+
+  const filterProducts = (searchTerm, category) => {
+    let filteredProducts = products;
+    if (searchTerm) {
+      if (!isNaN(searchTerm)) {
+        filteredProducts = products.filter(product => product.id === parseInt(searchTerm));
+      } else {
+        filteredProducts = filteredProducts.filter(product => product.title.toLowerCase().includes(searchTerm.toLowerCase()));
       }
     }
-    setProducts(filteredProducts);
+    if (category) {
+      filteredProducts = filteredProducts.filter(product => product.category === category);
+    }
+    if (filteredProducts.length === 0) {
+      setFilteredProducts([{ id: 0, title: "Product not available", price: "", description: "" }]);
+    } else {
+      setFilteredProducts(filteredProducts);
+    }
   };
 
   const handleSort = (event) => {
     const value = event.target.value;
     setSortOrder(value);
-    localStorage.setItem('sortOrder', value); // Save the sort order to local storage
+    localStorage.setItem('sortOrder', value);
 
-    let sortedProducts = [...products];
+    let sortedProducts = [...filteredProducts];
     if (value === 'lowToHigh') {
-      sortedProducts.sort((a, b) => {
-        const priceA = parseInt(a.price.replace(/[^0-9]/g, ''));
-        const priceB = parseInt(b.price.replace(/[^0-9]/g, ''));
-        return priceA - priceB;
-      });
+      sortedProducts.sort((a, b) => a.price - b.price);
     } else if (value === 'highToLow') {
-      sortedProducts.sort((a, b) => {
-        const priceA = parseInt(a.price.replace(/[^0-9]/g, ''));
-        const priceB = parseInt(b.price.replace(/[^0-9]/g, ''));
-        return priceB - priceA;
-      });
+      sortedProducts.sort((a, b) => b.price - a.price);
     }
 
-    setProducts(sortedProducts);
+    setFilteredProducts(sortedProducts);
+  };
+
+  const clearFilters = () => {
+    setSearchTerm('');
+    setSortOrder('');
+    setSelectedCategory('');
+    setFilteredProducts(products);
   };
 
   return (
@@ -82,21 +119,26 @@ const ProductList = ({ addToCart }) => {
           className="search-input"
         />
         <select onChange={handleSort} value={sortOrder} className="sort-dropdown">
-          <option value="">Sort by</option>
+          <option value="">Sort by Price</option>
           <option value="lowToHigh">Price: Low to High</option>
           <option value="highToLow">Price: High to Low</option>
         </select>
+        <button onClick={clearFilters} className="clear-filters-button">Clear Filters</button>
       </div>
-      <div className="product-list">
-        {products.map(product => (
-          <div key={product.id} className="product-item">
-            <h2>{product.name}</h2>
-            <p>{product.price}</p>
-            <p>{product.description}</p>
-            {product.id !== 0 && <button onClick={() => addToCart(product)}>Add to Cart</button>}
-          </div>
+      <div className="categories-container">
+        {categories.map(category => (
+          <button key={category} onClick={() => handleCategorySelect(category)} className={`category-button ${category === selectedCategory ? 'selected' : ''}`}>
+            {category}
+          </button>
         ))}
       </div>
+      {loading ? (
+        <div className="loader-container">
+          <ClipLoader color="#007BFF" loading={loading} size={50} />
+        </div>
+      ) : (
+        <ProductFilter filteredProducts={filteredProducts} addToCart={addToCart} />
+      )}
     </div>
   );
 };
